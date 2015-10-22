@@ -2,12 +2,12 @@
 require_once "./include/config.php";
 require_once "./include/ShortUrl.php";
 
-if (empty($_GET["c"])) {
-    header("Location: shorten.html");
+if (empty($_GET["q"])) {
+    header("Location: badq.html");
     exit;
 } 
 
-$code = $_GET["c"];
+$code = $_GET["q"];
 
 try {
     $pdo = new PDO(DB_PDODRIVER . ":host=" . DB_HOST . ";dbname=" . DB_DATABASE,
