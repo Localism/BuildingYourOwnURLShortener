@@ -2,24 +2,24 @@
 /**
  * This class provides all of the functionality needed to create (encode) and
  * decode shortened URLs.
- * 
+ *
  * @author Alex Fraundorf - AffordableWebSitePublishing.com LLC
  *
- * Give credit where it is due: Although this package is significantly 
- * different, it was orignally inspired by the URL shortener written by 
+ * Give credit where it is due: Although this package is significantly
+ * different, it was orignally inspired by the URL shortener written by
  * Brian Cray - http://briancray.com/posts/free-php-url-shortener-script
  */
 class ShortUrl
 {
     /**
      * @var string the characters used in building the short URL
-     * 
+     *
      * YOU MUST NOT CHANGE THESE ONCE YOU START CREATING SHORTENED URLs!
      */
     protected static $chars = "123456789bcdfghjkmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ";
 
     /**
-     * @var string holds the name of the database table to use 
+     * @var string holds the name of the database table to use
      */
     protected static $table = "short_urls";
 
@@ -40,10 +40,10 @@ class ShortUrl
 
     /**
      * Constructor
-     * 
+     *
      * Sets the class variable $pdo with a reference to a PDO object and the
      * class variable $timestamp with the current timestamp.
-     *  
+     *
      * @param PDO $pdo a reference to the PDO database connection object
      */
     public function __construct(PDO $pdo) {
@@ -53,16 +53,16 @@ class ShortUrl
 
     /**
      * Create a short code from a long URL.
-     * 
+     *
      * Delegates validating the URLs format, validating it, optionally
      * connecting to the URL to make sure it exists, and checking the database
      * to see if the URL is already there. If so, the cooresponding short code
      * is returned. Otherwise, createShortCode() is called to handle the tasks.
-     * 
+     *
      * @param string $url the long URL to be shortened
      * @return string the short code on success
      * @throws Exception if an error occurs
-     */    
+     */
     public function urlToShortCode($url) {
         if (empty($url)) {
             throw new \Exception("No URL was supplied.");
@@ -88,13 +88,13 @@ class ShortUrl
 
     /**
      * Retrieve a long URL from a short code.
-     * 
+     *
      * Deligates validating the supplied short code, getting the long URL from
      * the database, and optionally incrementing the URL's access counter.
-     * 
+     *
      * @param string $code the short code associated with a long URL
      * @param boolean $increment whether to increment the record's counter
-     * 
+     *
      * @return string the long URL
      * @throws Exception if an error occurs
      */
@@ -123,7 +123,7 @@ class ShortUrl
 
     /**
      * Check to see if the supplied URL is a valid format
-     * 
+     *
      * @param string $url the long URL
      * @return boolean whether URL is a valid format
      */
@@ -132,9 +132,9 @@ class ShortUrl
     }
 
     /* Check to see if the URL exists
-     * 
+     *
      * Uses cURL to access the URL and make sure a 404 error is not returned.
-     * 
+     *
      * @param string $url the long URL
      * @return boolean whether the URL does not return a 404 code
      */
@@ -152,11 +152,11 @@ class ShortUrl
 
     /**
      * Check the database for the long URL.
-     * 
+     *
      * If the URL is already in the database then the short code for it is
      * returned.  If the URL is not, false is returned.  An exception is thrown
      * if there is a database error.
-     *  
+     *
      * @param string $url the long URL
      * @return string|boolean the short code if it exists - false if it does not
      * @throws PDOException if a database exception occurs
@@ -175,30 +175,54 @@ class ShortUrl
     }
 
     /**
+     * Check the database for the shortCode.
+     *
+     * If the shortcode is already in the database then true is
+     * returned.  If the shortcode is not, false is returned.  An exception is thrown
+     * if there is a database error.
+     *
+     * @param string $code the shortcode
+     * @return boolean if shortcode already exists
+     * @throws PDOException if a database exception occurs
+     */
+    protected function codeExistsInDb($code) {
+        $query = "SELECT long_url FROM " . self::$table .
+            " WHERE short_code = :short_code LIMIT 1";
+        $stmt = $this->pdo->prepare($query);
+        $params = array(
+            "short_code" => $code
+        );
+        $stmt->execute($params);
+
+        $result = $stmt->fetch();
+        return (empty($result)) ? false : $result["long_url"];
+    }
+
+    /**
      * Delegates creating a short code from a long URL.
-     * 
+     *
      * Delegates inserting the URL into the database, converting the integer
      * of the row's ID column into a short code, and updating the database with
      * the code. If successful, it returns the short code. If there is an error,
      * an exception is thrown.
-     * 
+     *
      * @param string $url the long URL
      * @return string the created short code
-     * @throws Exception if an error occurs 
+     * @throws Exception if an error occurs
      */
     protected function createShortCode($url) {
         $id = $this->insertUrlInDb($url);
-        $shortCode = $this->convertIntToShortCode($id);    
+        $shortCode = $this->convertIntToShortCode($id);
         $this->insertShortCodeInDb($id, $shortCode);
         return $shortCode;
     }
-    
+
     /**
      * Inserts a new row into the database.
-     * 
+     *
      * Inserts a new row into the database with the URL and returns the ID of
      * the row. If there is a database error an exception is thrown.
-     * 
+     *
      * @param string $url the long URL
      * @return integer on success the integer of the newly inserted  row
      * @throws PDOException if an error occurs
@@ -219,11 +243,11 @@ class ShortUrl
 
     /**
      * Convert an integer to a short code.
-     * 
+     *
      * This method does the actual conversion of the ID integer to a short code.
      * If successful, it returns the created code. If there is an error, an
      * exception is thrown.
-     * 
+     *
      * @param int $id the integer to be converted
      * @return string the created short code
      * @throws Exception if an error occurs
@@ -247,7 +271,7 @@ class ShortUrl
         while ($id > $length - 1) {
             // determine the value of the next higher character
             // in the short code should be and prepend
-            $code = self::$chars[fmod($id, $length)] . 
+            $code = self::$chars[fmod($id, $length)] .
                 $code;
             // reset $id to remaining value to be converted
             $id = floor($id / $length);
@@ -262,11 +286,11 @@ class ShortUrl
 
     /**
      * Updates the database row with the short code.
-     * 
+     *
      * Updates the row with a specific ID with the provided short code. If
-     * successful, true is returned. An exception is thrown if there is an 
+     * successful, true is returned. An exception is thrown if there is an
      * error.
-     * 
+     *
      * @param int $id the ID of the database row to update
      * @param string $code the short code to associate with the row
      * @return boolean on success
@@ -295,7 +319,7 @@ class ShortUrl
 
     /**
      * Check to see if the supplied short code is a valid format
-     * 
+     *
      * @param string $code the short code
      * @return boolean whether the short code is a valid format
      */
@@ -305,10 +329,10 @@ class ShortUrl
 
     /**
      * Get the long URL from the database.
-     * 
+     *
      * Retrieve the URL associated with the short code from the database. If
      * there is an error, an exception is thrown.
-     * 
+     *
      * @param string $code the short code to look for in the database
      * @return string|boolean the long URL or false if it does not exist
      * @throws PDOException if an error occurs
@@ -320,7 +344,7 @@ class ShortUrl
         $params=array(
             "short_code" => $code
         );
-        $stmt->execute($params);  
+        $stmt->execute($params);
 
         $result = $stmt->fetch();
         return (empty($result)) ? false : $result;
@@ -328,10 +352,10 @@ class ShortUrl
 
     /**
      * Increment the record's access count.
-     * 
+     *
      * Increment the number of times a short code has been looked up to retrieve
      * its URL.
-     * 
+     *
      * @param integer $id the ID of the row to increment
      * @throws PDOException if an error occurs
      */
@@ -342,6 +366,6 @@ class ShortUrl
         $params = array(
             "id" => $id
         );
-        $stmt->execute($params);  
+        $stmt->execute($params);
     }
 }
