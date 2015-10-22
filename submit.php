@@ -1,6 +1,6 @@
 <?php
-require_once "../include/config.php";
-require_once "../include/ShortUrl.php";
+require_once "./include/config.php";
+require_once "./include/ShortUrl.php";
 
 if ($_SERVER["REQUEST_METHOD"] != "POST" || empty($_POST["url"])) {
     header("Location: shorten.html");

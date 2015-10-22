@@ -1,6 +1,6 @@
 <?php
-require_once "../include/config.php";
-require_once "../include/ShortUrl.php";
+require_once "./include/config.php";
+require_once "./include/ShortUrl.php";
 
 if (empty($_GET["c"])) {
     header("Location: shorten.html");
