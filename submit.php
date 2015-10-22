@@ -3,7 +3,7 @@ require_once "./include/config.php";
 require_once "./include/ShortUrl.php";
 
 if ($_SERVER["REQUEST_METHOD"] != "POST" || empty($_POST["url"])) {
-    header("Location: shorten.html");
+    http_response_code(412);
     exit;
 } 
 
@@ -12,7 +12,7 @@ try {
         DB_USERNAME, DB_PASSWORD);
 }
 catch (\PDOException $e) {
-    header("Location: error.html");
+    http_response_code(500);
     exit;
 }
 
@@ -21,18 +21,9 @@ try {
     $code = $shortUrl->urlToShortCode($_POST["url"]);
 }
 catch (\Exception $e) {
-    header("Location: error.html");
+    http_response_code(500);
     exit;
 }
 $url = SHORTURL_PREFIX . $code;
 
-echo <<<ENDHTML
-<html>
- <head>
-  <title>URL Shortener</title>
- </head>
- <body>
-  <p><strong>Short URL:</strong> <a href="$url">$url</a></p>
- </body>
-</html>
-ENDHTML;
+echo "{ url: \"" + $url + "\" }";

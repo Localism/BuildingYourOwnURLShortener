@@ -3,7 +3,7 @@ require_once "./include/config.php";
 require_once "./include/ShortUrl.php";
 
 if (empty($_GET["q"])) {
-    header("Location: badq.html");
+    http_response_code(412);
     exit;
 } 
 
@@ -14,7 +14,7 @@ try {
         DB_USERNAME, DB_PASSWORD);
 }
 catch (\PDOException $e) {
-    header("Location: error.html");
+    http_response_code(500);
     exit;
 }
 
@@ -25,7 +25,7 @@ try {
     header("Location: " . $url);
 }
 catch (\Exception $e) {
-print_r($e);
-    header("Location: error.html");
+    print_r($e);
+    http_response_code(500);
     exit;
 }
