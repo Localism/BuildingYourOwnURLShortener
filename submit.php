@@ -26,4 +26,4 @@ catch (\Exception $e) {
 }
 $url = SHORTURL_PREFIX . $code;
 
-echo "{ url: \"" + $url + "\" }";
+echo "{ url: \"" . $url . "\" }";
