@@ -16,7 +16,12 @@ class ShortUrl
      *
      * YOU MUST NOT CHANGE THESE ONCE YOU START CREATING SHORTENED URLs!
      */
-    protected static $chars = "123456789bcdfghjkmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ";
+    protected static $chars = "0123456789bcdfghjkmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ";
+
+    /**
+     * @var string length of shortcodes we are generating
+     */
+    protected static $codelen = 6;
 
     /**
      * @var string holds the name of the database table to use
@@ -212,7 +217,10 @@ class ShortUrl
      */
     protected function createShortCode($url) {
         $id = $this->insertUrlInDb($url);
-        $shortCode = $this->convertIntToShortCode($id);
+        $shortCode = "";
+        do{
+            $shortCode = $this->generateRandomShortCode();
+        } while($this->codeExistsInDb($shortCode));
         $this->insertShortCodeInDb($id, $shortCode);
         return $shortCode;
     }
@@ -281,6 +289,23 @@ class ShortUrl
         // self::$chars
         $code = self::$chars[$id] . $code;
 
+        return $code;
+    }
+
+    /**
+     * Generate random shortcode
+     *
+     * This method creates a completely random shortcode from the character set.
+     * Returns the created code.
+     *
+     * @return string the created short code
+     */
+    function generateRandomShortCode() {
+        $charsLength = strlen(self::$chars);
+        $code = '';
+        for ($i = 0; $i < self::$codelen; $i++) {
+            $code .= self::$chars[rand(0, $charsLength - 1)];
+        }
         return $code;
     }
 
