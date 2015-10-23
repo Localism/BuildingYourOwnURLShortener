@@ -5,7 +5,7 @@ require_once "./include/ShortUrl.php";
 if ($_SERVER["REQUEST_METHOD"] != "POST" || empty($_POST["url"])) {
     http_response_code(412);
     exit;
-} 
+}
 
 try {
     $pdo = new PDO(DB_PDODRIVER . ":host=" . DB_HOST . ";dbname=" . DB_DATABASE,
@@ -26,4 +26,4 @@ catch (\Exception $e) {
 }
 $url = SHORTURL_PREFIX . $code;
 
-echo "{ url: \"" . $url . "\" }";
+echo "{ \"url\": \"" . $url . "\" }";
